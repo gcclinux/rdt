@@ -13,7 +13,7 @@ git clone https://github.com/yourusername/rd-proxy
 cd rd-proxy
 
 # Build the binary
-go build -o rd-proxy
+go build -o rd-proxy-$(arch)-$(uname -s)
 ```
 
 ## Run directly with Go
