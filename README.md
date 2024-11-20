@@ -1,6 +1,6 @@
-# rd-proxy
+# rd-traffic
 
-Redirect Proxy runs local to mimic localhost traffic
+Redirect traffic runs local server to mimic localhost traffic when required
 
 ## Requirements
 - Go 1.21 or higher
@@ -9,11 +9,11 @@ Redirect Proxy runs local to mimic localhost traffic
 ## Building
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rd-proxy
-cd rd-proxy
+git clone https://github.com/gcclinux/rd-traffic
+cd rd-traffic
 
 # Build the binary
-go build -o rd-proxy-$(arch)-$(uname -s)
+go build -o rd-traffic-$(arch)-$(uname -s)
 ```
 
 ## Run directly with Go
@@ -23,7 +23,7 @@ go run main.go
 
 ## Or run the built binary
 ```
-./rd-proxy
+./rd-traffic-$(arch)-$(uname -s)
 ```
 
 ## Configuration
