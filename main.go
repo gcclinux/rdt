@@ -17,6 +17,7 @@ type Config struct {
 	InboundPort     string `json:"inbound_port"`
 	OutboundAddress string `json:"outbound_address"`
 	OutboundPort    string `json:"outbound_port"`
+	Verbose         bool   `json:"verbose"`
 }
 
 func loadConfig() (*Config, error) {
