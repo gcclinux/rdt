@@ -1,4 +1,4 @@
-# rdt
+# RDT
 
 RDT "Redirect Data Traffic" runs on a local host redirecting network traffic from local LAN address to localhost/127.0.0.1
 
