@@ -1,4 +1,3 @@
-// config.go
 package main
 
 import (
@@ -12,14 +11,7 @@ import (
 	"time"
 )
 
-type Config struct {
-	InboundAddress  string `json:"inbound_address"`
-	InboundPort     string `json:"inbound_port"`
-	OutboundAddress string `json:"outbound_address"`
-	OutboundPort    string `json:"outbound_port"`
-	Verbose         bool   `json:"verbose"`
-}
-
+// loadConfig reads the configuration from a JSON file
 func loadConfig() (*Config, error) {
 	file, err := os.ReadFile("config.json")
 	if err != nil {
@@ -34,30 +26,55 @@ func loadConfig() (*Config, error) {
 	return &config, nil
 }
 
-func setupLogging() error {
-	return os.MkdirAll("logs", 0755)
+// setupLogging creates the logs directory if verbose logging is enabled and it doesn't already exist
+func setupLogging(config *Config) error {
+	if config.Verbose {
+		if _, err := os.Stat("logs"); os.IsNotExist(err) {
+			if err := os.MkdirAll("logs", 0755); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
-func createLogFile(prefix string) (*os.File, error) {
-	timestamp := time.Now().Format("20060102150405")
-	filename := filepath.Join("logs", fmt.Sprintf("%s_%s.log", prefix, timestamp))
-	return os.Create(filename)
+// createLogFile creates a new log file with a timestamped filename if verbose logging is enabled
+func createLogFile(config *Config, prefix string) (*os.File, error) {
+	if config.Verbose {
+		timestamp := time.Now().Format("20060102150405")
+		filename := filepath.Join("logs", fmt.Sprintf("%s_%s.log", prefix, timestamp))
+		return os.Create(filename)
+	}
+	return nil, nil
 }
 
+// logConnection logs a formatted message with a timestamp to the provided writer
 func logConnection(writer io.Writer, format string, v ...interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Fprintf(writer, "%s - %s\n", timestamp, fmt.Sprintf(format, v...))
 }
 
+// main is the entry point of the application
 func main() {
-	if err := setupLogging(); err != nil {
-		log.Fatal("Failed to setup logging:", err)
-	}
-
 	// Load configuration
 	config, err := loadConfig()
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
+	}
+
+	// Setup logging
+	if err := setupLogging(config); err != nil {
+		log.Fatal("Failed to setup logging:", err)
+	}
+
+	// Example usage of createLogFile
+	logFile, err := createLogFile(config, "example")
+	if err != nil {
+		log.Fatal("Failed to create log file:", err)
+	}
+	if logFile != nil {
+		defer logFile.Close()
+		logConnection(logFile, "This is a log message")
 	}
 
 	// Listen on configured address
@@ -67,7 +84,7 @@ func main() {
 	}
 	defer listener.Close()
 
-	log.Printf("Proxy listening on %s:%s", config.InboundAddress, config.InboundPort)
+	log.Printf("RDT listening on %s:%s", config.InboundAddress, config.InboundPort)
 
 	for {
 		inbound, err := listener.Accept()
@@ -76,63 +93,5 @@ func main() {
 			continue
 		}
 		go handleConnection(inbound, config)
-	}
-}
-
-func handleConnection(inbound net.Conn, config *Config) {
-	// Create log files
-	inboundLog, err := createLogFile("inbound")
-	if err != nil {
-		log.Printf("Failed to create inbound log: %v", err)
-		return
-	}
-	defer inboundLog.Close()
-
-	outboundLog, err := createLogFile("outbound")
-	if err != nil {
-		log.Printf("Failed to create outbound log: %v", err)
-		return
-	}
-	defer outboundLog.Close()
-
-	// Log connection details
-	logConnection(inboundLog, "New connection from %s", inbound.RemoteAddr())
-
-	outbound, err := net.Dial("tcp", fmt.Sprintf("%s:%s", config.OutboundAddress, config.OutboundPort))
-	if err != nil {
-		logConnection(inboundLog, "Failed to connect to target: %v", err)
-		inbound.Close()
-		return
-	}
-	defer outbound.Close()
-	defer inbound.Close()
-
-	// Modified copy function with logging
-	go func() {
-		buffer := make([]byte, 1024)
-		for {
-			n, err := inbound.Read(buffer)
-			if err != nil {
-				if err != io.EOF {
-					logConnection(inboundLog, "Error reading from inbound: %v", err)
-				}
-				return
-			}
-			logConnection(inboundLog, "Received: %s", string(buffer[:n]))
-			outbound.Write(buffer[:n])
-		}
-	}()
-
-	buffer := make([]byte, 1024)
-	for {
-		n, err := outbound.Read(buffer)
-		if err != nil {
-			if err != io.EOF {
-				logConnection(outboundLog, "Error reading from outbound: %v", err)
-			}
-			return
-		}
-		logConnection(outboundLog, "Sent: %s", string(buffer[:n]))
-		inbound.Write(buffer[:n])
 	}
 }

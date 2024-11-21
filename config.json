@@ -1,7 +1,7 @@
 {
-    "inbound_address": "192.168.0.45",
+    "inbound_address": "192.168.0.98",
     "inbound_port": "4891",
     "outbound_address": "127.0.0.1",
     "outbound_port": "4891",
-    "verbose": "true"
+    "verbose": true
 }
