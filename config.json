@@ -1,7 +1,7 @@
 {
     "inbound_address": "192.168.0.98",
-    "inbound_port": "4891",
-    "outbound_address": "127.0.0.1",
-    "outbound_port": "4891",
-    "verbose": true
+    "inbound_port": "3024",
+    "outbound_address": "172.23.119.2",
+    "outbound_port": "3024",
+    "verbose": false
 }

@@ -1,6 +1,6 @@
 # RDT
 
-RDT "Redirect Data Traffic" runs on a local host redirecting network traffic from local LAN address to localhost/127.0.0.1
+RDT "Redirect Data Traffic" runs on a local host redirecting network traffic from local LAN address to localhost/127.0.0.1 or another other `<LAN_IP_ADDRESS>` that the main PC has connection too.
 
 ## Requirements
 - Go 1.21 or higher
@@ -80,3 +80,6 @@ curl -X POST http://<LAN_IP_ADDRESS>:4891/v1/chat/completions -d '{
 Replace `<LAN_IP_ADDRESS>` with the actual IP address of the machine hosting GPT4All and configured as "inbound_address" in the config.json.
 
 By following these steps, you can access GPT4All queries and LLM on the local area network using the LAN address.
+
+## ChangeLog
+- 1.0.0 - Initial version with single port redirect
